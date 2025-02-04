@@ -57,6 +57,8 @@ jobs:
     permissions: 
       id-token: write
       contents: read
+    env: 
+      DEPLOY_HOST: ${{ inputs.deploy-host || inputs.service }}.govnet
     steps:
       - name: Configure Host SSH
         uses: shimataro/ssh-key-action@v2
@@ -64,26 +66,26 @@ jobs:
           name: govnet_github
           known_hosts: replace-me
           config: |
-            Host ${{ inputs.deploy-host }}
+            Host ${{ env.DEPLOY_HOST }}
               HostName ${{ inputs.deploy-host-ip }}
               User ${{ inputs.deploy-user }}
               Port ${{ inputs.deploy-host-port }}
               IdentityFile ~/.ssh/govnet_github
               ForwardAgent yes
           key: ${{ secrets.deploy-ssh-private-key }}
-      - name: Overwrite known hosts of ${{ inputs.deploy-host }}
+      - name: Overwrite known hosts of ${{ env.DEPLOY_HOST}}
         run: ssh-keyscan -p ${{inputs.deploy-host-port}} ${{ inputs.deploy-host-ip }} > ~/.ssh/known_hosts
       - uses: actions/checkout@v4
       - name: Create SSH tunnel
         run: |
-          ssh -N -L ${{ secrets.db-port }}:${{ secrets.db-host }}:${{ secrets.db-port }} ${{ inputs.deploy-host }} &
+          ssh -N -L ${{ secrets.db-port }}:${{ secrets.db-host }}:${{ secrets.db-port }} ${{ env.DEPLOY_HOST }} &
           echo $! > postgres_ssh_pid
-          sleep 10
+          sleep 1
       - name: Run migrations for ${{ inputs.service }}
         env:
           MIGRATOR_DOCER_IMG: ${{ vars.DOCKERHUB_ORG }}/goose-migrator:${{ inputs.migrator-version }}
         run: |
-          docker run --rm -v ${{ inputs.migration-path }}/app/scripts 
+          docker run --rm -v ${{ inputs.migration-path }}/app/scripts \
             -v ${{ inputs.migration-path }}/app/scripts \
             -e GOVNET_DB_USERNAME=${{ secrets.db-username }} \
             -e GOVNET_DB_PASSWORD=${{ secrets.db-password }} \
@@ -96,4 +98,4 @@ jobs:
         run: |
           kill $(cat postgres_ssh_pid)
       - name: Deploy ${{ inputs.service }} with docker
-        run: ssh ${{ inputs.deploy-host }} "make -C ${{ inputs.deploy-dir }} deploy-service-tag service=${{ inputs.service }} tag=${{ inputs.tag }}"
+        run: ssh ${{ env.DEPLOY_HOST }} "make -C ${{ inputs.deploy-dir }} deploy-service-tag service=${{ inputs.service }} tag=${{ inputs.tag }}"
