@@ -85,15 +85,15 @@ jobs:
         env:
           MIGRATOR_DOCER_IMG: ${{ vars.DOCKERHUB_ORG }}/goose-migrator:${{ inputs.migrator-version }}
         run: |
-          docker run --rm -v ${{ inputs.migration-path }}/app/scripts \
-            -v ${{ inputs.migration-path }}/app/scripts \
+          docker run --rm --network host \
+            -v ${{ inputs.migration-path }}/app/scripts:ro \
             -e GOVNET_DB_USERNAME=${{ secrets.db-username }} \
             -e GOVNET_DB_PASSWORD=${{ secrets.db-password }} \
             -e GOVNET_DB_HOST=127.0.0.1 \
             -e GOVNET_DB_PORT=${{ secrets.db-port }} \
             -e GOVNET_DB_DATABASE=${{ secrets.db-database }} \
             -e GOVNET_DB_DRIVER=postgres \
-            --network host ${{ env.MIGRATOR_DOCER_IMG}} "make migrate-up service=${{ inputs.service }}"
+            sh -c ${{ env.MIGRATOR_DOCER_IMG}} "make -C /app migrate-up service=${{ inputs.service }}"
       - name: Close SSH tunnel
         run: |
           kill $(cat postgres_ssh_pid)
