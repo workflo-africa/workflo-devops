@@ -58,7 +58,7 @@ jobs:
       id-token: write
       contents: read
     env: 
-      DEPLOY_HOST: ${{ inputs.deploy-host || inputs.service }}.govnet
+      DEPLOY_HOST: ${{ inputs.service }}.govnet
     steps:
       - name: Configure Host SSH
         uses: shimataro/ssh-key-action@v2
@@ -93,7 +93,8 @@ jobs:
             -e GOVNET_DB_PORT=${{ secrets.db-port }} \
             -e GOVNET_DB_DATABASE=${{ secrets.db-database }} \
             -e GOVNET_DB_DRIVER=postgres \
-            sh -c ${{ env.MIGRATOR_DOCER_IMG}} "make -C /app migrate-up service=${{ inputs.service }}"
+            ${{ env.MIGRATOR_DOCER_IMG}} \
+            sh -c "make -C /app migrate-up service=${{ inputs.service }}"
       - name: Close SSH tunnel
         run: |
           kill $(cat postgres_ssh_pid)
