@@ -81,13 +81,12 @@ jobs:
           ssh -N -L ${{ secrets.db-port }}:${{ secrets.db-host }}:${{ secrets.db-port }} ${{ env.DEPLOY_HOST }} &
           echo $! > postgres_ssh_pid
           sleep 1
-      - run: pwd && ls -lah
       - name: Run migrations for ${{ inputs.service }}
         env:
           MIGRATOR_DOCER_IMG: ${{ vars.DOCKERHUB_ORG }}/goose-migrator:${{ inputs.migrator-version }}
         run: |
           docker run --rm --network host \
-            -v ${{ inputs.migration-path }}/app/scripts:ro \
+            -v ${{ inputs.migration-path }}:/app/scripts:ro \
             -e GOVNET_DB_USERNAME=${{ secrets.db-username }} \
             -e GOVNET_DB_PASSWORD=${{ secrets.db-password }} \
             -e GOVNET_DB_HOST=127.0.0.1 \
