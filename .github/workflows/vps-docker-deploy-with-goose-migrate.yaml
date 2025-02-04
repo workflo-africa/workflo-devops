@@ -1,0 +1,99 @@
+name: Deploy to docker host
+  
+on: 
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      tag:
+        required: false
+        type: string
+        default: ${{ github.sha }}
+      deploy-host:
+        required: false
+        type: string
+        default: "${{ inputs.service }}.govnet"
+      deploy-host-ip:
+        required: true
+        type: string
+      deploy-host-port:
+        required: true
+        type: number
+      deploy-user:
+        required: false
+        type: string
+        default: 'github-actions'
+      deploy-dir:
+        required: false
+        type: string
+        default: '/deploy/govnet'
+      migrator-version:
+        required: false
+        type: string
+        default: '202502'
+      migration-path:
+        required: false
+        type: string
+        default: './sql/migrations'
+    secrets:
+      deploy-ssh-private-key:
+        required: true
+      db-host:
+        required: true
+      db-port:
+        required: true
+      db-username:
+        required: true
+      db-password:
+        required: true
+      db-database:
+        required: true
+      
+jobs:
+  docker-compose:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure Host SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          name: govnet_github
+          known_hosts: replace-me
+          config: |
+            Host ${{ inputs.deploy-host }}
+              HostName ${{ inputs.deploy-host-ip }}
+              User ${{ inputs.deploy-user }}
+              Port ${{ inputs.deploy-host-port }}
+              IdentityFile ~/.ssh/govnet_github
+              ForwardAgent yes
+          key: ${{ secrets.deploy-ssh-private-key }}
+      - name: Overwrite known hosts of ${{ inputs.deploy-host }}
+        run: ssh-keyscan -p ${{inputs.deploy-host-port}} ${{ inputs.deploy-host-ip }} > ~/.ssh/known_hosts
+      - uses: actions/checkout@v4
+      - name: Create SSH tunnel
+        run: |
+          ssh -N -L ${{ secrets.db-port }}:${{ secrets.db-host }}:${{ secrets.db-port }} ${{ inputs.deploy-host }} &
+          echo $! > postgres_ssh_pid
+          sleep 10
+      - name: Run migrations for ${{ inputs.service }}
+        env:
+          MIGRATOR_DOCER_IMG: ${{ vars.DOCKERHUB_ORG }}/goose-migrator:${{ inputs.migrator-version }}
+        run: |
+          docker run --rm -v ${{ inputs.migration-path }}/app/scripts 
+            -v ${{ inputs.migration-path }}/app/scripts \
+            -e GOVNET_DB_USERNAME=${{ secrets.db-username }} \
+            -e GOVNET_DB_PASSWORD=${{ secrets.db-password }} \
+            -e GOVNET_DB_HOST=127.0.0.1 \
+            -e GOVNET_DB_PORT=${{ secrets.db-port }} \
+            -e GOVNET_DB_DATABASE=${{ secrets.db-database }} \
+            -e GOVNET_DB_DRIVER=postgres \
+            --network host ${{ env.MIGRATOR_DOCER_IMG}} "make migrate-up service=${{ inputs.service }}"
+      - name: Close SSH tunnel
+        run: |
+          kill $(cat postgres_ssh_pid)
+      - name: Deploy ${{ inputs.service }} with docker
+        run: ssh ${{ inputs.deploy-host }} "make -C ${{ inputs.deploy-dir }} deploy-service-tag service=${{ inputs.service }} tag=${{ inputs.tag }}"
