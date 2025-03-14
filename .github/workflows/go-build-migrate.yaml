@@ -89,8 +89,7 @@ jobs:
         COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
         COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
         COPY --from=gooze /bin/goose /bin/goose
-        RUN mkdir -p /src/sql
-        COPY ${{ inputs.migration-path }} /src/sql/migrations/
+        COPY ${{ inputs.migration-path }} .
         ENV APP_HTTP_PORT=${{ inputs.service-port }}
         ENV VERSION=${{ inputs.service }}-${{ inputs.version || env.GITHUB_SHA_SHORT }}
         ENV SOURCE=github.com/${{ github.repository }}@${{ inputs.version || env.GITHUB_SHA_SHORT }}
