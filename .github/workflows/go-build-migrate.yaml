@@ -82,7 +82,7 @@ jobs:
         cat <<EOF > Dockerfile 
         FROM ${{ env.DOCKERFILE_BUILDER_IMG }} as builder
         RUN apk add --no-cache ca-certificates tzdata
-        FROM gomicro/goose:3.24 as gooze
+        FROM gomicro/goose:3.24.1 as gooze
         FROM scratch
         WORKDIR /
         COPY ${{ env.OUTPUT_BIN }} .
