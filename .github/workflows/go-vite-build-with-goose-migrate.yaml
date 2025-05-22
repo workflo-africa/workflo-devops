@@ -103,15 +103,11 @@ jobs:
     - name: Write Dockerfile
       run: |
         cat <<EOF > Dockerfile 
-        FROM ${{ env.DOCKERFILE_BUILDER_IMG }} as builder
-        RUN apk add --no-cache ca-certificates tzdata
         FROM gomicro/goose:3.24.1 as gooze
-        # FROM scratch
+        FROM ${{ env.DOCKERFILE_BUILDER_IMG }} as builder
         WORKDIR /app
         COPY dist /app/dist
         COPY ${{ env.OUTPUT_BIN }} /app
-        # COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-        # COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
         COPY --from=gooze /bin/goose /bin/goose
         COPY ${{ inputs.migration-path }} /sql/migrations
         ENV APP_HTTP_PORT=${{ inputs.service-port }}
