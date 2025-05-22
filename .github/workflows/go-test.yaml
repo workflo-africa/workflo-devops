@@ -1,6 +1,6 @@
 name: Go Tests
 env:
-  GOPRIVATE: "github.com/govnet-africa"
+  GOPRIVATE: "github.com/govnet-*"
 on: 
   workflow_call:
     inputs:
