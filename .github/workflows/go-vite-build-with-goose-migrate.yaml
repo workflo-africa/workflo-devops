@@ -112,6 +112,8 @@ jobs:
         COPY ${{ inputs.migration-path }} /sql/migrations
         ENV APP_HTTP_PORT=${{ inputs.service-port }}
         ENV VERSION=${{ inputs.service }}-${{ env.GITHUB_SHA_SHORT }}
+        ENV WEB_PRODUCTION_MODE=true
+        ENV GO_PRODUCTION_MODE=true
         ENV SOURCE=github.com/${{ github.repository }}@${{ env.GITHUB_SHA_SHORT }}
         EXPOSE ${{ inputs.service-port }}
         CMD ["/app/${{ env.OUTPUT_BIN }}"]
