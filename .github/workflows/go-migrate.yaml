@@ -49,7 +49,7 @@ jobs:
     secrets:  
       git-token: ${{ secrets.git-token }}
       git-user: ${{ secrets.git-user }}
-      dockerhub-token: ${{ secrets.docker-token }}
+      dockerhub-token: ${{ secrets.dockerhub-token }}
       dockerhub-user: ${{ secrets.dockerhub-user }}
     permissions:
       id-token: write
