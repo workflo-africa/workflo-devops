@@ -50,10 +50,10 @@ jobs:
       - name: Connect to Tailnet
         uses: tailscale/github-action@v3
         with:
-          authkey: ${{ secrets.ts-auth-key }}
-          tags: ${{.inputs.tailscale-tags }}
           use-cache: 'true'
-          args: '--login-server ${{ inputs.tailscale-server }}'
+          authkey: ${{ secrets.ts-auth-key }}
+          # tags: ${{.inputs.tailscale-tags }}
+          args: '--login-server https://${{ inputs.tailscale-server }}'
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
