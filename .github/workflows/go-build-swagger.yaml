@@ -91,8 +91,8 @@ jobs:
         FROM ${{ env.DOCKERFILE_BUILDER_IMG }} as builder
         RUN apk add --no-cache ca-certificates tzdata
         FROM scratch
-        WORKDIR /
-        COPY ${{ env.OUTPUT_BIN }} .
+        WORKDIR /app
+        COPY ${{ env.OUTPUT_BIN }} /app/${{ env.OUTPUT_BIN }}
         COPY ${{ inputs.swagger-docs }} /app/${{ inputs.swagger-docs }}
         COPY ${{ inputs.include-path }} /app/${{ inputs.include-path }}
         COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
@@ -101,7 +101,7 @@ jobs:
         ENV VERSION=${{ inputs.service }}-${{ inputs.version || env.GITHUB_SHA_SHORT }}
         ENV SOURCE=github.com/${{ github.repository }}@${{ inputs.version || env.GITHUB_SHA_SHORT }}
         EXPOSE ${{ inputs.service-port }}
-        CMD ["/${{ env.OUTPUT_BIN }}"]
+        CMD ["/app/${{ env.OUTPUT_BIN }}"]
         EOF
     - name: Docker (build + push) ${{ inputs.service }} image to registry
       uses: docker/build-push-action@v5
