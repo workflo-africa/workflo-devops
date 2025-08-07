@@ -29,7 +29,7 @@ on:
         required: false
         type: string
         default: 'sql/migrations'
-      include-path:
+      jar-path:
         required: false
         type: string
         default: 'README.md'
@@ -92,7 +92,7 @@ jobs:
         COPY ${{ env.OUTPUT_BIN }} .
         COPY --from=gooze /bin/goose /bin/goose
         COPY ${{ inputs.migration-path }} /sql/migrations
-        COPY ${{ inputs.include-path }} /${{ inputs.include-path }}
+        COPY ${{ inputs.jar-path }} /${{ inputs.jar-path }}
         ENV APP_HTTP_PORT=${{ inputs.service-port }}
         ENV VERSION=${{ inputs.service }}-${{ inputs.version || env.GITHUB_SHA_SHORT }}
         ENV SOURCE=github.com/${{ github.repository }}@${{ inputs.version || env.GITHUB_SHA_SHORT }}
