@@ -144,3 +144,4 @@ jobs:
         DEPLOY_URL: "${{ inputs.dispatch-workflow-url }}?query=workflow_dispatch&tag=${{ env.GITHUB_SHA_SHORT }}"
       run: |
         echo "## 🚀 [**Deploy this Build**](${{ env.DEPLOY_URL }})" >> $GITHUB_STEP_SUMMARY
+        echo "- You will need to provide the tag (${{ env.GITHUB_SHA_SHORT }}) to deploy this version" >> $GITHUB_STEP_SUMMARY
