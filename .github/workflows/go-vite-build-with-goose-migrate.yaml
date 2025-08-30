@@ -43,7 +43,7 @@ on:
       dispatch-workflow-url:
         required: false
         type: string
-        default:''
+        default: ''
     secrets: 
       git-token:
         required: true
