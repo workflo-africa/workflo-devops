@@ -29,6 +29,10 @@ on:
         required: false
         type: string
         default: 'sql/migrations'
+      dispatch-workflow-url:
+        required: false
+        type: string
+        default: ''
     secrets: 
       git-token:
         required: true
@@ -108,3 +112,11 @@ jobs:
           ${{ env.DOCKERHUB_REPO }}:${{ env.SERVICE_BUILD }}
           ${{ env.DOCKERHUB_REPO }}:${{ env.GITHUB_SHA_SHORT }}
           ${{ env.DOCKERHUB_REPO }}:latest
+    - name: Link to Deploy Workflow
+      if:  success() && inputs.dispatch-workflow-url != ''
+      env:
+        DEPLOY_URL: "${{ inputs.dispatch-workflow-url }}?query=workflow_dispatch&tag=${{ env.GITHUB_SHA_SHORT }}"
+      run: |
+        echo "## 🚀 [**Deploy this Build**](${{ env.DEPLOY_URL }})" >> $GITHUB_STEP_SUMMARY
+        echo "- Copy the tag (${{ env.GITHUB_SHA_SHORT }}) before clicking the link above" >> $GITHUB_STEP_SUMMARY
+        echo "- You will need to provide the tag (${{ env.GITHUB_SHA_SHORT }}) to deploy this version" >> $GITHUB_STEP_SUMMARY
