@@ -9,6 +9,7 @@ on:
       version: 
         required: false
         type: string
+        default: 'develop'
       portal: 
         required: true
         type: string
@@ -21,9 +22,9 @@ on:
         type: string
         default: ${{ vars.BUILD_ENV || 'develop' }}
     secrets:
-      dockerhub-user: 
+      docker-user: 
         required: true
-      dockerhub-token: 
+      docker-token: 
         required: true
 jobs:
   vite:
@@ -82,24 +83,28 @@ jobs:
           EXPOSE ${{ inputs.portal-port }}
           CMD ["nginx", "-g", "daemon off;"]
           EOF
+      - name: Write version env varibles
+        run: |
+          echo "GITHUB_SHA_SHORT=`git rev-parse --short ${{ github.sha }}`" >> $GITHUB_ENV
+          echo "SERVICE_BUILD=`date -I`-`git rev-parse --short ${{ github.sha }}`" >> $GITHUB_ENV
+          echo "GITHUB_BRANCH_SHORT=`git branch --show-current | sed 's/\//_/g' | tr -d ' '`" >> $GITHUB_ENV
       - name: Set docker branch tag
         run: |
           echo "GITHUB_SHA_SHORT=`git rev-parse --short ${{ github.sha }}`" >> $GITHUB_ENV
-      - name: Login to Docker Hub
+      - name: Login to Docker Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.dockerhub-user }}
-          password: ${{ secrets.dockerhub-token }}
+          registry: ${{ vars.DOCKER_REGISTRY || 'docker.registry.io' }}
+          username: ${{ secrets.docker-user }}
+          password: ${{ secrets.docker-token }}
       - name: Build and push docker image
         uses: docker/build-push-action@v5
         env: 
-          DOCKERHUB_REPO: ${{ vars.DOCKERHUB_ORG }}/${{ vars.DOCKERHUB_REPO }}
+          DOCKER_REPO: ${{ vars.DOCKER_REGISTRY || 'docker.registry.io' }}/${{ vars.DOCKER_ORG }}/${{ vars.DOCKER_REPO }}
         with:
           context: ${{ env.ARTIFACT_DIR }}
           push: true
           tags: |
-            ${{ env.DOCKERHUB_REPO }}:${{ github.sha }}
-            ${{ env.DOCKERHUB_REPO }}:${{ inputs.environment || 'develop' }}
-            ${{ env.DOCKERHUB_REPO }}:${{ inputs.version }}
-            ${{ env.DOCKERHUB_REPO }}:${{ env.GITHUB_SHA_SHORT }}
-            ${{ env.DOCKERHUB_REPO }}:latest
+            ${{ env.DOCKER_REPO }}:${{ inputs.version || 'develop' }}
+            ${{ env.DOCKER_REPO }}:${{ env.GITHUB_BRANCH_SHORT }}
+            ${{ env.DOCKER_REPO }}:latest
