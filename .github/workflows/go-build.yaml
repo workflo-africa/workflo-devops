@@ -24,6 +24,9 @@ on:
       go-file:
         type: string
         default: ./main.go
+      docker-host: 
+        required: false
+        default: ${{ vars.DOCKER_REGISTRY || 'docker.registry.io' }}
     secrets: 
       git-token:
         required: true
@@ -55,7 +58,7 @@ jobs:
     - name: Login to Docker Registry
       uses: docker/login-action@v3
       with:
-        registry: ${{ vars.DOCKER_REGISTRY || 'docker.registry.io' }}
+        registry: ${{ inputs.docker-host }}
         username: ${{ secrets.docker-user }}
         password: ${{ secrets.docker-token }} 
     - name: Setup go ${{ inputs.go-version }}
@@ -91,7 +94,7 @@ jobs:
     - name: Docker (build + push) ${{ inputs.service }} image to registry
       uses: docker/build-push-action@v5
       env: 
-        DOCKER_REPO: ${{ vars.DOCKER_REGISTRY || 'docker.registry.io' }}/${{ vars.DOCKER_ORG }}/${{ vars.DOCKER_REPO }}
+        DOCKER_REPO: ${{ inputs.docker-host }}/${{ vars.DOCKER_ORG }}/${{ vars.DOCKER_REPO }}
       with:
         context: .
         push: true
