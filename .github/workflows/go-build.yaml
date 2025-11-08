@@ -26,6 +26,7 @@ on:
         default: ./main.go
       docker-host: 
         required: false
+        type: string
         default: ${{ vars.DOCKER_REGISTRY || 'docker.registry.io' }}
     secrets: 
       git-token:

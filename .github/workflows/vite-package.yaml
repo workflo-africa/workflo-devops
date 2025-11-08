@@ -23,6 +23,7 @@ on:
         default: ${{ vars.BUILD_ENV || 'develop' }}
       docker-host: 
         required: false
+        type: string
         default: ${{ vars.DOCKER_REGISTRY || 'docker.registry.io' }}
     secrets:
       docker-user: 
