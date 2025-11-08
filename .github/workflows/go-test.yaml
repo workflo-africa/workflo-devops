@@ -1,14 +1,14 @@
 name: Go Tests
 env:
-  GOPRIVATE: "github.com/govnet-*"
-on: 
+  GOPRIVATE: "github.com/Instacomm"
+on:
   workflow_call:
     inputs:
       version:
         required: false
         type: string
-        default: '1.22.0'
-    secrets: 
+        default: "1.25"
+    secrets:
       git-token:
         required: true
       git-user:
@@ -20,19 +20,19 @@ jobs:
       id-token: write
       contents: read
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-go@v5
-      with:
-        token: ${{ secrets.git-token }}
-        go-version: ${{ inputs.version }}
-        cache: true
-    - name: Configure Netrc
-      uses: extractions/netrc@v2
-      with:
-        machine: github.com
-        username: ${{ secrets.git-user }}
-        password: ${{ secrets.git-token }}    
-    - name: Download dependencies
-      run: go mod download
-    - name: Run tests
-      run: go test ./...
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          token: ${{ secrets.git-token }}
+          go-version: ${{ inputs.version }}
+          cache: true
+      - name: Configure Netrc
+        uses: extractions/netrc@v2
+        with:
+          machine: github.com
+          username: ${{ secrets.git-user }}
+          password: ${{ secrets.git-token }}
+      - name: Download dependencies
+        run: go mod download
+      - name: Run tests
+        run: go test ./...

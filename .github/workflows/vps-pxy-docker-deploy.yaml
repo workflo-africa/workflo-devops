@@ -1,6 +1,6 @@
 name: Deploy to docker host
-  
-on: 
+
+on:
   workflow_dispatch:
   workflow_call:
     inputs:
@@ -14,7 +14,7 @@ on:
       jump-host-ip:
         required: false
         type: string
-        default: '4.5.6.7'
+        default: "4.5.6.7"
       jump-host-port:
         required: false
         type: number
@@ -22,11 +22,11 @@ on:
       deploy-host:
         required: false
         type: string
-        default: "${{ inputs.service }}.govnet"
+        default: "${{ inputs.service }}.instacom"
       deploy-host-ip:
         required: false
         type: string
-        default: '0.1.2.3'
+        default: "0.1.2.3"
       deploy-host-port:
         required: false
         type: number
@@ -34,38 +34,38 @@ on:
       deploy-user:
         required: false
         type: string
-        default: 'github-actions'
+        default: "github-actions"
       docker-dir:
         required: false
         type: string
-        default: '/opt/app'
+        default: "/opt/app"
     secrets:
       ssh-private-key:
         required: true
 jobs:
   docker_deploy:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       id-token: write
       contents: read
     steps:
       - name: Configure Host SSH
         uses: shimataro/ssh-key-action@v2
         with:
-          name: govnet_github
+          name: instacom_github
           known_hosts: xxxx
           config: |
             Host jump-host
               Port ${{ inputs.jump-host-port }}
               HostName ${{ inputs.jump-host-ip }}
               User ${{ inputs.deploy-user }}
-              IdentityFile ~/.ssh/govnet_github
+              IdentityFile ~/.ssh/instacom_github
             Host ${{ inputs.deploy-host }}
               HostName ${{ inputs.deploy-host-ip }}
               User ${{ inputs.deploy-user }}
               Port ${{ inputs.deploy-host-port }}
               ProxyCommand ssh -q -W %h:%p jump-host
-              IdentityFile ~/.ssh/govnet_github
+              IdentityFile ~/.ssh/instacom_github
           key: ${{ secrets.ssh-private-key }}
       - name: Overwrite known hosts of ${{ inputs.deploy-host }}
         run: |

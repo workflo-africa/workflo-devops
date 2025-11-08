@@ -1,6 +1,6 @@
 env:
   DOCKERFILE_BUILDER_IMG: eclipse-${{ inputs.java-distribution }}:${{ inputs.java-version }}-jdk
-  DOCKERHUB_REPO: ${{ vars.DOCKERHUB_ORG }}/${{ vars.DOCKERHUB_REPO }}
+  DOCKER_REPO: ${{ vars.DOCKER_ORG }}/${{ vars.DOCKER_REPO }}
   DOCKER_BUILDKIT: 1
 on:
   workflow_call:
@@ -12,19 +12,19 @@ on:
       java-version:
         required: false
         type: string
-        default: '20'
+        default: "20"
       java-distribution:
         required: false
         type: string
-        default: '${{ inputs.java-distribution }}'
+        default: "${{ inputs.java-distribution }}"
       java-platform:
         required: false
         type: string
-        default: 'linux/amd64'
+        default: "linux/amd64"
       jre-cache:
         required: false
         type: string
-        default: 'maven'
+        default: "maven"
       service:
         required: true
         type: string
@@ -35,14 +35,14 @@ on:
       dockerfile-runner-img:
         required: false
         type: string
-        default: 'eclipse-${{ inputs.java-distribution }}:${{ inputs.java-version }}-jre'
+        default: "eclipse-${{ inputs.java-distribution }}:${{ inputs.java-version }}-jre"
       consul-host:
         required: true
         type: string
       consul-port:
         required: true
         type: number
-    secrets: 
+    secrets:
       mvn-token:
         required: true
       mvn-user:
@@ -58,106 +58,106 @@ jobs:
       id-token: write
       contents: read
     steps:
-    - uses: actions/checkout@v4
-    - name: Set env
-      run: |
-        echo "GITHUB_SHA_SHORT=`git rev-parse --short ${{ github.sha }}`" >> $GITHUB_ENV
-        echo "GITHUB_BRANCH_SHORT=`git branch --show-current | sed 's/\//_/g' | tr -d ' '`" >> $GITHUB_ENV
-        echo "DOCKERHUB_REPO=${{ vars.DOCKERHUB_ORG }}/$(echo ${{ vars.DOCKERHUB_REPO }} | cut -d '/' -f 2)" >> $GITHUB_ENV
-        echo "SERVICE_BUILD=`date -I`-`git rev-parse --short ${{ github.sha }}`" >> $GITHUB_ENV
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.docker-user }}
-        password: ${{ secrets.docker-token }} 
-    - name: Setup JDK ${{ inputs.java-version }}
-      uses: actions/setup-java@v4
-      with:
-        distribution: ${{ inputs.java-distribution }}
-        java-version: ${{ inputs.java-version }}
-        cache: ${{ inputs.jre-cache }}
-    - name: Set up Maven settings.xml
-      run: |
-        cat <<EOF > ~/.m2/settings.xml 
-        <?xml version="1.0" encoding="UTF-8"?>
-        <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
-          <activeProfiles>
-              <activeProfile>github</activeProfile>
-          </activeProfiles>
-          <profiles>
-              <profile>
-                <id>github</id>
-                <repositories>
-                    <repository>
-                      <id>central</id>
-                      <url>https://repo1.maven.org/maven2</url>
-                    </repository>
-                    <repository>
-                      <id>govpay</id>
-                      <url>https://maven.pkg.github.com/govnet-africa/govpay</url>
-                      <snapshots>
-                          <enabled>true</enabled>
-                      </snapshots>
-                    </repository>
-                    <repository>
-                      <id>govnet</id>
-                      <url>https://maven.pkg.github.com/govnet-libraries/govbill-java-cli</url>
-                      <snapshots>
-                          <enabled>true</enabled>
-                      </snapshots>
-                    </repository>
-                </repositories>
-              </profile>
-          </profiles>
+      - uses: actions/checkout@v4
+      - name: Set env
+        run: |
+          echo "GITHUB_SHA_SHORT=`git rev-parse --short ${{ github.sha }}`" >> $GITHUB_ENV
+          echo "GITHUB_BRANCH_SHORT=`git branch --show-current | sed 's/\//_/g' | tr -d ' '`" >> $GITHUB_ENV
+          echo "DOCKER_REPO=${{ vars.DOCKER_ORG }}/$(echo ${{ vars.DOCKER_REPO }} | cut -d '/' -f 2)" >> $GITHUB_ENV
+          echo "SERVICE_BUILD=`date -I`-`git rev-parse --short ${{ github.sha }}`" >> $GITHUB_ENV
+      - name: Login to Docker Reposotory (${{ inputs.docker-host }})
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.docker-user }}
+          password: ${{ secrets.docker-token }}
+      - name: Setup JDK ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ inputs.java-distribution }}
+          java-version: ${{ inputs.java-version }}
+          cache: ${{ inputs.jre-cache }}
+      - name: Set up Maven settings.xml
+        run: |
+          cat <<EOF > ~/.m2/settings.xml 
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <activeProfiles>
+                <activeProfile>github</activeProfile>
+            </activeProfiles>
+            <profiles>
+                <profile>
+                  <id>github</id>
+                  <repositories>
+                      <repository>
+                        <id>central</id>
+                        <url>https://repo1.maven.org/maven2</url>
+                      </repository>
+                      <repository>
+                        <id>govpay</id>
+                        <url>https://maven.pkg.github.com/Instacomm/govpay</url>
+                        <snapshots>
+                            <enabled>true</enabled>
+                        </snapshots>
+                      </repository>
+                      <repository>
+                        <id>instacom</id>
+                        <url>https://maven.pkg.github.com/instacom-libraries/govbill-java-cli</url>
+                        <snapshots>
+                            <enabled>true</enabled>
+                        </snapshots>
+                      </repository>
+                  </repositories>
+                </profile>
+            </profiles>
 
-          <servers>
-              <server>
-                <id>govpay</id>
-                <username>${{ secrets.mvn-user }}</username>
-                <password>${{ secrets.mvn-token }}</password>
-              </server>
-              <server>
-                <id>govnet</id>
-                <username>${{ secrets.mvn-user }}</username>
-                <password>${{ secrets.mvn-token }}</password>
-              </server>
-          </servers>
-        </settings>
-        EOF
-    - name: Build with ${{ inputs.jre-cache }}
-      run: |
-        rm -rf target && \
-        mvn -B package --file pom.xml -DskipTests 
-    - name: Write Dockerfile
-      env:
-        DOCKERFILE_BUILDER_IMG: eclipse-${{ inputs.java-distribution }}:${{ inputs.java-version }}-jdk
-        DOCKERFILE_RUNNER_IMG: eclipse-${{ inputs.java-distribution }}:${{ inputs.java-version }}-jre
-      run: |
-        cat <<EOF > Dockerfile 
-        FROM --platform=${{inputs.java-platform}} ${{ env.DOCKERFILE_RUNNER_IMG }}
-        WORKDIR /app
-        RUN addgroup --system govnet
-        RUN adduser --system --ingroup govnet --shell /bin/sh --disabled-password --no-create-home govnet-user
-        RUN chown -R govnet-user:govnet /app
-        USER govnet-user
-        COPY target/*.jar /app/app.jar
-        ENV APP_PORT=${{ inputs.service-port }}
-        ENV BUILD=${{ env.SERVICE_BUILD }}
-        ENV VERSION=${{ inputs.service }}-${{ inputs.version || env.GITHUB_SHA_SHORT }}
-        EXPOSE ${{ inputs.service-port }}
-        ENTRYPOINT ["java", "-Djava.security.egd=file:/prod/./urandom", "-jar", "/app/app.jar"]
-        EOF
-    - name: Set docker branch tag
-      run: |
-        echo "GITHUB_BRANCH_SHORT=`git branch --show-current | sed 's/\//_/g' | tr -d ' '`" >> $GITHUB_ENV
-    - name: Build and push docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ env.DOCKERHUB_REPO }}:${{ github.sha }}
-          ${{ env.DOCKERHUB_REPO }}:${{ inputs.version || env.GITHUB_SHA_SHORT }}
-          ${{ env.DOCKERHUB_REPO }}:latest
+            <servers>
+                <server>
+                  <id>govpay</id>
+                  <username>${{ secrets.mvn-user }}</username>
+                  <password>${{ secrets.mvn-token }}</password>
+                </server>
+                <server>
+                  <id>instacom</id>
+                  <username>${{ secrets.mvn-user }}</username>
+                  <password>${{ secrets.mvn-token }}</password>
+                </server>
+            </servers>
+          </settings>
+          EOF
+      - name: Build with ${{ inputs.jre-cache }}
+        run: |
+          rm -rf target && \
+          mvn -B package --file pom.xml -DskipTests
+      - name: Write Dockerfile
+        env:
+          DOCKERFILE_BUILDER_IMG: eclipse-${{ inputs.java-distribution }}:${{ inputs.java-version }}-jdk
+          DOCKERFILE_RUNNER_IMG: eclipse-${{ inputs.java-distribution }}:${{ inputs.java-version }}-jre
+        run: |
+          cat <<EOF > Dockerfile 
+          FROM --platform=${{inputs.java-platform}} ${{ env.DOCKERFILE_RUNNER_IMG }}
+          WORKDIR /app
+          RUN addgroup --system instacom
+          RUN adduser --system --ingroup instacom --shell /bin/sh --disabled-password --no-create-home instacom-user
+          RUN chown -R instacom-user:instacom /app
+          USER instacom-user
+          COPY target/*.jar /app/app.jar
+          ENV APP_PORT=${{ inputs.service-port }}
+          ENV BUILD=${{ env.SERVICE_BUILD }}
+          ENV VERSION=${{ inputs.service }}-${{ inputs.version || env.GITHUB_SHA_SHORT }}
+          EXPOSE ${{ inputs.service-port }}
+          ENTRYPOINT ["java", "-Djava.security.egd=file:/prod/./urandom", "-jar", "/app/app.jar"]
+          EOF
+      - name: Set docker branch tag
+        run: |
+          echo "GITHUB_BRANCH_SHORT=`git branch --show-current | sed 's/\//_/g' | tr -d ' '`" >> $GITHUB_ENV
+      - name: Build and push docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.DOCKER_REPO }}:${{ github.sha }}
+            ${{ env.DOCKER_REPO }}:${{ inputs.version || env.GITHUB_SHA_SHORT }}
+            ${{ env.DOCKER_REPO }}:latest

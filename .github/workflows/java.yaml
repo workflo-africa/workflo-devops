@@ -6,19 +6,19 @@ on:
       version:
         required: false
         type: string
-        default: null
+        default: develop
       java-version:
         required: false
         type: string
-        default: '20'
+        default: "20"
       java-distribution:
         required: false
         type: string
-        default: 'temurin'
+        default: "temurin"
       jre-cache:
         required: false
         type: string
-        default: 'maven'
+        default: "maven"
       service:
         required: true
         type: string
@@ -29,7 +29,7 @@ on:
       consul-host:
         required: false
         type: string
-        default: 'consul'
+        default: "consul"
       consul-port:
         required: false
         type: number
@@ -37,23 +37,23 @@ on:
       deploy-dir:
         required: true
         type: string
-    secrets: 
+    secrets:
       mvn-token:
         required: true
       mvn-user:
         required: true
 jobs:
   build:
-    uses: govnet-africa/devops/.github/workflows/java-build.yaml@v3
+    uses: Instacomm/devops/.github/workflows/java-build.yaml@v3
     with:
       service: ${{ inputs.service }}
       service-port: ${{ inputs.service-port }}
-      version:  ${{inputs.version }}
+      version: ${{inputs.version }}
       java-version: ${{ inputs.java-version }}
       java-distribution: ${{ inputs.java-distribution }}
       consul-host: ${{ inputs.consul-host }}
       consul-port: ${{ inputs.consul-port }}
-    secrets: 
+    secrets:
       mvn-token: ${{ secrets.mvn-token }}
       mvn-user: ${{ secrets.mvn-user }}
     permissions:
@@ -61,17 +61,16 @@ jobs:
       contents: read
   deploy:
     needs: build
-    uses: govnet-africa/devops/.github/workflows/vps-docker-deploy.yaml@v3
+    uses: Instacomm/devops/.github/workflows/vps-docker-deploy.yaml@v3
     with:
       service: ${{ inputs.service }}
-      deploy-host: "${{ inputs.service }}.govnet"
+      deploy-host: "${{ inputs.service }}.instacom"
       deploy-host-ip: ${{ inputs.deploy-host-ip }}
       deploy-host-port: ${{ inputs.deploy-host-port }}
       deploy-dir: ${{ inputs.deploy-dir }}
       tag: ${{ inputs.version || github.sha }}
     secrets:
-       deploy-ssh-private-key: ${{ secrets.deploy-ssh-private-key }}
+      deploy-ssh-private-key: ${{ secrets.deploy-ssh-private-key }}
     permissions:
       id-token: write
       contents: read
-    

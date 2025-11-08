@@ -33,40 +33,39 @@ on:
       git-user:
         required: true
       deploy-ssh-private-key:
-        required: true  
-      dockerhub-token:
         required: true
-      dockerhub-user:
+      docker-token:
+        required: true
+      docker-user:
         required: true
 jobs:
   build:
-    uses: govnet-africa/devops/.github/workflows/go-build-migrate.yaml@v4
+    uses: Instacomm/devops/.github/workflows/go-build-migrate.yaml@v1
     with:
       service: ${{ inputs.service }}
       version: ${{ inputs.version }}
       service-port: ${{ inputs.service-port || 80 }}
-      go-version: ${{ inputs.go-version || '1.22' }}
-    secrets:  
+      go-version: ${{ inputs.go-version || '1.25' }}
+    secrets:
       git-token: ${{ secrets.git-token }}
       git-user: ${{ secrets.git-user }}
-      dockerhub-token: ${{ secrets.dockerhub-token }}
-      dockerhub-user: ${{ secrets.dockerhub-user }}
+      docker-token: ${{ secrets.docker-token }}
+      docker-user: ${{ secrets.docker-user }}
     permissions:
       id-token: write
       contents: read
   deploy:
     needs: build
-    uses: govnet-africa/devops/.github/workflows/vps-docker-deploy.yaml@v4
+    uses: Instacomm/devops/.github/workflows/vps-docker-deploy.yaml@v1
     with:
       service: ${{ inputs.service }}
-      deploy-host: "${{ inputs.service }}.govnet"
+      deploy-host: "${{ inputs.service }}.instacom"
       deploy-host-ip: ${{ inputs.deploy-host-ip }}
       deploy-host-port: ${{ inputs.deploy-host-port }}
       deploy-dir: ${{ inputs.deploy-dir }}
       tag: ${{ inputs.version || github.sha }}
     secrets:
-       deploy-ssh-private-key: ${{ secrets.deploy-ssh-private-key }}
+      deploy-ssh-private-key: ${{ secrets.deploy-ssh-private-key }}
     permissions:
       id-token: write
       contents: read
-    

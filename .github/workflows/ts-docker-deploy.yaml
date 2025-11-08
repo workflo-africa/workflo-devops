@@ -1,6 +1,6 @@
 name: Deploy to docker host
-  
-on: 
+
+on:
   workflow_dispatch:
   workflow_call:
     inputs:
@@ -21,18 +21,18 @@ on:
       ssh-user:
         required: false
         type: string
-        default: 'github'
+        default: "github"
       docker-compose-dir:
         required: true
         type: string
       tailscale-server:
         required: false
         type: string
-        default: 'controlplane.tailscale.com'
+        default: "controlplane.tailscale.com"
       tailscale-tags:
         required: false
         type: string
-        default: 'tag:ci'
+        default: "tag:ci"
     secrets:
       ts-auth-key:
         required: true
@@ -41,11 +41,11 @@ on:
 jobs:
   docker-compose-via-tailscale:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       id-token: write
       contents: read
     env:
-      DEPLOY_HOST: "${{ inputs.service }}.service.govnet"
+      DEPLOY_HOST: "${{ inputs.service }}.service.instacom"
     steps:
       - name: Set short variables
         run: |
@@ -54,22 +54,22 @@ jobs:
       - name: Connect to Tailnet
         uses: tailscale/github-action@v3
         with:
-          use-cache: 'true'
+          use-cache: "true"
           authkey: ${{ secrets.ts-auth-key }}
           # tags: ${{.inputs.tailscale-tags }}
-          args: '--login-server https://${{ inputs.tailscale-server }} --hostname=github-runner-${{ env.GITHUB_BRANCH_SHORT }}-${{ github.run_id }}'
+          args: "--login-server https://${{ inputs.tailscale-server }} --hostname=github-runner-${{ env.GITHUB_BRANCH_SHORT }}-${{ github.run_id }}"
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.ssh-private-key }}
-          name: govnet_github
+          name: instacom_github
           known_hosts: i-will-change-shortly
           config: |
             Host ${{ env.DEPLOY_HOST }}
               Port ${{ inputs.host-port }}
               HostName ${{ inputs.host-ip }}
               User ${{ inputs.ssh-user }}
-              IdentityFile ~/.ssh/govnet_github
+              IdentityFile ~/.ssh/instacom_github
       - name: Overwrite known hosts of ${{ env.DEPLOY_HOST }}
         run: ssh-keyscan -p ${{ inputs.host-port }} ${{ inputs.host-ip }} > ~/.ssh/known_hosts
       - name: Deploy ${{ inputs.service }} with docker-compose
