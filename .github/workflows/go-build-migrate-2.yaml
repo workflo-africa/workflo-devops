@@ -105,15 +105,14 @@ jobs:
           EOF
       - name: Docker (build + push) ${{ inputs.service }} image to registry
         uses: docker/build-push-action@v5
+        env: 
+          DOCKER_REPO: ${{ inputs.docker-host }}/${{ vars.DOCKER_ORG }}/${{ vars.DOCKER_REPO }}
         with:
           context: .
           push: true
           tags: |
-            ${{ env.DOCKER_REPO }}:${{ github.sha }}
-            ${{ env.DOCKER_REPO }}:${{ inputs.version }}
+            ${{ env.DOCKER_REPO }}:${{ inputs.version || 'develop' }}
             ${{ env.DOCKER_REPO }}:${{ env.GITHUB_BRANCH_SHORT }}
-            ${{ env.DOCKER_REPO }}:${{ env.SERVICE_BUILD }}
-            ${{ env.DOCKER_REPO }}:${{ env.GITHUB_SHA_SHORT }}
             ${{ env.DOCKER_REPO }}:latest
       - name: Link to Deploy Workflow
         if: success() && inputs.dispatch-workflow-url != ''
