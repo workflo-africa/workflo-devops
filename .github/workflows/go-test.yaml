@@ -47,6 +47,5 @@ jobs:
         run: |
           cp ./.env.local.example ./.env
           cp ./config.example.yaml ./config.yaml
-          go test ./...
       - name: Run tests
         run: go test ./...
