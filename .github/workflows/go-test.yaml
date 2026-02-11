@@ -19,6 +19,15 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    services:
+      postgres:
+        image: postgres:${{ vars.TEST_POSTGRES_VERSION || 16 }}
+        env:
+          POSTGRES_USER: ${{ vars.TEST_DB_USERNAME || 'instacom' }}
+          POSTGRES_PASSWORD: ${{ vars.TEST_DB_PASSWORD || 'instacom' }}
+          POSTGRES_DB: ${{ vars.TEST_DB_NAME || 'instacom' }}
+        ports:
+          - ${{ vars.TEST_DB_PORT || 5432 }}:5432
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -34,5 +43,10 @@ jobs:
           password: ${{ secrets.git-token }}
       - name: Download dependencies
         run: go mod download
+      - name: Configure application
+        run: |
+          cp ./.env.local.example ./.env
+          cp ./config.example.yaml ./config.yaml
+          go test ./...
       - name: Run tests
         run: go test ./...
