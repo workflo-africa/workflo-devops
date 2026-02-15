@@ -1,5 +1,5 @@
 env:
-  GOPRIVATE: "github.com/Instacomm"
+  GOPRIVATE: "github.com/workflo"
   OUTPUT_BIN: ${{ inputs.service }}-bin
   DOCKERFILE_BUILDER_IMG: alpine
 on:
