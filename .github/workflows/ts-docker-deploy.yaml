@@ -62,14 +62,14 @@ jobs:
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.ssh-private-key }}
-          name: authorized_keys
+          name: ci
           known_hosts: i-will-change-shortly
           config: |
             Host ${{ env.DEPLOY_HOST }}
               Port ${{ inputs.host-port }}
               HostName ${{ inputs.host-ip }}
               User ${{ inputs.ssh-user }}
-              IdentityFile ~/.ssh/authorized_keys
+              IdentityFile ~/.ssh/ci
       - name: Overwrite known hosts of ${{ env.DEPLOY_HOST }}
         run: ssh-keyscan -p ${{ inputs.host-port }} ${{ inputs.host-ip }} > ~/.ssh/known_hosts
       - name: Deploy ${{ inputs.service }} with docker-compose
