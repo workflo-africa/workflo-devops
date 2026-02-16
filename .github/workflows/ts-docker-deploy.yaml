@@ -21,7 +21,7 @@ on:
       ssh-user:
         required: false
         type: string
-        default: "github"
+        default: "ci"
       docker-compose-dir:
         required: true
         type: string
