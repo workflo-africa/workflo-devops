@@ -1,6 +1,6 @@
 name: Go Tests
 env:
-  GOPRIVATE: "github.com/Instacomm"
+  GOPRIVATE: "github.com/workflo-africa"
 on:
   workflow_call:
     inputs:
@@ -23,9 +23,9 @@ jobs:
       postgres:
         image: postgres:${{ vars.TEST_POSTGRES_VERSION || 16 }}
         env:
-          POSTGRES_USER: ${{ vars.TEST_DB_USERNAME || 'instacom' }}
-          POSTGRES_PASSWORD: ${{ vars.TEST_DB_PASSWORD || 'instacom' }}
-          POSTGRES_DB: ${{ vars.TEST_DB_NAME || 'instacom' }}
+          POSTGRES_USER: ${{ vars.TEST_DB_USERNAME || 'workflo' }}
+          POSTGRES_PASSWORD: ${{ vars.TEST_DB_PASSWORD || 'workflo' }}
+          POSTGRES_DB: ${{ vars.TEST_DB_NAME || 'workflo' }}
         ports:
           - ${{ vars.TEST_DB_PORT || 5432 }}:5432
     steps:
